@@ -5,21 +5,19 @@ public class Sc_mainMenu : MonoBehaviour
 {
     public void Play()
     {
+        Sc_soundManager.Instance.PlaySound("Play");
         SceneManager.LoadScene("Introduction");
     }
 
     public void Quit()
     {
+        Sc_soundManager.Instance.PlaySound("Quit");
         Application.Quit();
-    }
-
-    public void Settings()
-    {
-        SceneManager.LoadScene("Settings");
     }
 
     public void HowToPlay()
     {
+        Sc_soundManager.Instance.PlaySound("HowToPlay");
         SceneManager.LoadScene("HowToPlay");
     }
 }

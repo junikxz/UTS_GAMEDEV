@@ -2,9 +2,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Sc_introManager : MonoBehaviour
+public class Sc_paragraphHandler : MonoBehaviour
 {
-    private string nextScene = "Level1";
+    [SerializeField] public string nextScene;
     public TextMeshProUGUI paragraphText;
     [TextArea(3, 10)] public string[] paragraphs;
     private int currParagraphIdx = 0;
@@ -12,7 +12,7 @@ public class Sc_introManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        if(paragraphs.Length > 0)
+        if (paragraphs.Length > 0)
         {
             paragraphText.text = paragraphs[currParagraphIdx];
         }
@@ -26,15 +26,16 @@ public class Sc_introManager : MonoBehaviour
             DisplayNextParagraph();
         }
     }
-    
+
     private void DisplayNextParagraph()
     {
         currParagraphIdx++;
 
-        if(currParagraphIdx < paragraphs.Length)
+        if (currParagraphIdx < paragraphs.Length)
         {
             paragraphText.text = paragraphs[currParagraphIdx];
-        } else
+        }
+        else
         {
             Debug.Log("End of intro. Moving to next scene: " + nextScene);
             SceneManager.LoadScene(nextScene);
