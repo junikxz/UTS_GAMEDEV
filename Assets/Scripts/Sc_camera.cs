@@ -2,40 +2,29 @@ using UnityEngine;
 
 public class Sc_camera : MonoBehaviour
 {
-    public Transform target;
-    public float distance = 5.0f;
-    public float mouseSensitivity = 4.0f;
-    public float smoothTime = 0.2f;
+    public Transform target; // Target yang akan diikuti (Pemain)
+    public Vector3 offset = new Vector3(0f, 5f, -7f); // Jarak kamera dari pemain (X, Atas, Belakang)
+    public float smoothSpeed = 10f; // Kecepatan kamera mengikuti pemain
 
-    private float yaw = 0.0f;
-    private float pitch = 0.0f;
-
-    private Vector3 currentRotation;
-    private Vector3 smoothVelocity = Vector3.zero;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    // LateUpdate dipanggil setelah semua Update selesai.
+    // Ini pilihan terbaik untuk kamera agar tidak patah-patah saat mengikuti.
+    void LateUpdate()
     {
-        if (target != null)
+        // Pastikan ada target yang di-set
+        if (target == null)
         {
-            yaw = target.eulerAngles.y;
-            pitch = 15.0f;
+            Debug.LogWarning("Target kamera belum diatur!");
+            return;
         }
-        Cursor.lockState = CursorLockMode.Locked;
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        yaw += Input.GetAxis("Mouse X") * mouseSensitivity;
-        pitch -= Input.GetAxis("Mouse Y") * mouseSensitivity;
+        // Tentukan posisi yang diinginkan kamera
+        Vector3 desiredPosition = target.position + offset;
 
-        pitch = Mathf.Clamp(pitch, -30f, 60f);
+        // Gerakkan kamera secara halus dari posisi saat ini ke posisi yang diinginkan
+        Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
+        transform.position = smoothedPosition;
 
-        Vector3 targetRotation = new Vector3(pitch, yaw);
-        currentRotation = Vector3.SmoothDamp(currentRotation, targetRotation, ref smoothVelocity, smoothTime);
-
-        transform.eulerAngles = currentRotation;
-
-        transform.position = target.position - transform.forward * distance;
+        // Pastikan kamera selalu melihat ke arah pemain
+        transform.LookAt(target);
     }
 }
