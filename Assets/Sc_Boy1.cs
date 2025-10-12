@@ -1,57 +1,71 @@
 using UnityEngine;
-using UnityEngine.InputSystem.XR;
 
+// Atribut ini memastikan objek selalu punya komponen yang dibutuhkan
+[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(Animator))]
 public class Sc_Boy1 : MonoBehaviour
 {
-    private Animator anim;
+    // Pengaturan bisa diubah di Inspector
     public float speed = 5f;
     public float turnSmoothTime = 0.1f;
-    private float turnSmoothVelocity;
-    private Transform cam;
+
+    // Komponen yang dibutuhkan
+    private Animator anim;
     private CharacterController controller;
+    private Transform cam;
 
+    // Variabel internal untuk rotasi halus
+    private float turnSmoothVelocity;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // Ambil semua komponen saat game dimulai
         anim = GetComponent<Animator>();
-        cam = Camera.main.transform;
-        Cursor.lockState = CursorLockMode.Locked;
         controller = GetComponent<CharacterController>();
+        cam = Camera.main.transform;
+
+        // Kunci kursor di tengah layar
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
-        Vector3 direction = new Vector3(h, 0f, v).normalized;
+        // 1. DAPATKAN INPUT
+        // Menggunakan GetAxisRaw agar lebih responsif
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
+        // Cek apakah ada input gerakan (joystick/tombol ditekan)
         if (direction.magnitude >= 0.1f)
         {
+            // 2. HITUNG ARAH & ROTASI
+            // Menghitung sudut tujuan berdasarkan arah input dan arah kamera
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+            
+            // Membuat rotasi menjadi halus agar tidak patah-patah
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
+            
+            // Terapkan rotasi ke karakter
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
+            // 3. GERAKKAN KARAKTER
+            // Buat vektor gerakan berdasarkan arah yang sudah dihitung (relatif terhadap kamera)
             Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            
+            // Gunakan CharacterController.Move() untuk menggerakkan karakter.
+            // Ini adalah cara yang benar karena menangani collision/tabrakan.
             controller.Move(moveDir.normalized * speed * Time.deltaTime);
-        }
-        if (h != 0 || v != 0)
-        {
-            anim.SetBool("isJalan", true);
-            Vector3 targetDirection = new Vector3(h, 0f, v);
-            targetDirection = Camera.main.transform.TransformDirection(targetDirection);
-            targetDirection.y = 0.0f;
 
-            Quaternion targetRotation = Quaternion.LookRotation(targetDirection, Vector3.up);
-            this.transform.rotation = targetRotation;
+            // 4. SET ANIMASI
+            // Jika ada gerakan, set parameter "isJalan" menjadi true
+            anim.SetBool("isJalan", true);
         }
         else
         {
+            // Jika tidak ada gerakan, set parameter "isJalan" menjadi false
             anim.SetBool("isJalan", false);
         }
-
-        this.transform.position += Vector3.ProjectOnPlane(Camera.main.transform.forward, Vector3.up) * v * Time.deltaTime * 5f;
-        this.transform.position += Vector3.ProjectOnPlane(Camera.main.transform.right, Vector3.up) * h * Time.deltaTime * 5f;
     }
 }
