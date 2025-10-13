@@ -8,8 +8,10 @@ public class QuizManager : MonoBehaviour
     [Header("UI References")]
     public GameObject quizPanel;
     public GameObject preQuizPanel;
+    public GameObject feedbackPanel;
     public TextMeshProUGUI questionText;
     public TextMeshProUGUI timerText;
+    public TextMeshProUGUI feedbackText;
     public Button[] optionButtons;
 
     [System.Serializable]
@@ -34,6 +36,10 @@ public class QuizManager : MonoBehaviour
     public Color wrongColor = Color.red;
     public Color defaultColor = Color.white;
 
+    [Header("Reward System")]
+    public int rewardCoins = 100;
+    private bool allAnswersCorrect = true;
+
     void Update()
     {
         if (isCountingDown)
@@ -45,6 +51,7 @@ public class QuizManager : MonoBehaviour
             {
                 Debug.Log("⏰ Waktu habis! Kembali ke preQuizPanel...");
                 isCountingDown = false;
+                allAnswersCorrect = false; // gagal
                 ReturnToPreQuiz();
             }
         }
@@ -55,7 +62,10 @@ public class QuizManager : MonoBehaviour
         Debug.Log("✅ StartQuiz() dipanggil!");
         quizPanel.SetActive(true);
         preQuizPanel.SetActive(false);
+        feedbackPanel.SetActive(false);
+
         currentQuestionIndex = 0;
+        allAnswersCorrect = true;
         DisplayNextQuestion();
     }
 
@@ -79,14 +89,14 @@ public class QuizManager : MonoBehaviour
             optionButtons[i].image.color = defaultColor;
         }
 
-        // Mulai timer baru
+        // Reset timer setiap pertanyaan baru
         currentTime = timePerQuestion;
         isCountingDown = true;
     }
 
     void OnAnswerSelected(int index)
     {
-        if (!isCountingDown) return; // biar gak bisa spam klik setelah timeout
+        if (!isCountingDown) return;
 
         isCountingDown = false;
         Question q = questions[currentQuestionIndex];
@@ -101,7 +111,8 @@ public class QuizManager : MonoBehaviour
         else
         {
             optionButtons[index].image.color = wrongColor;
-            Debug.Log("❌ Jawaban salah! Kembali ke preQuizPanel...");
+            Debug.Log("❌ Jawaban salah!");
+            allAnswersCorrect = false;
             Invoke(nameof(ReturnToPreQuiz), 1.0f);
         }
     }
@@ -120,7 +131,39 @@ public class QuizManager : MonoBehaviour
 
     void EndQuiz()
     {
-        Debug.Log("🎉 Kuis selesai!");
         quizPanel.SetActive(false);
+
+        if (allAnswersCorrect)
+        {
+            int currentCoins = PlayerPrefs.GetInt("coins", 0);
+            currentCoins += rewardCoins;
+            PlayerPrefs.SetInt("coins", currentCoins);
+            PlayerPrefs.Save();
+
+            feedbackPanel.SetActive(true);
+            feedbackText.text = $"Selamat! Kamu menjawab semua pertanyaan dengan benar! Silahkan pergi ke Pos 2 sesuai petunjuk yang diberikan dan selesaikan soal medium!\n\n+{rewardCoins} Koin";
+
+            // 🔁 Update tampilan koin di pojok layar
+            FindObjectOfType<CoinDisplayManager>()?.RefreshCoins();
+        }
+
+        else
+        {
+            // Kalau ada yang salah, langsung kembali ke preQuizPanel
+            preQuizPanel.SetActive(true);
+        }
     }
+
+    public void CloseFeedback()
+    {
+        feedbackPanel.SetActive(false);
+
+        // ✅ Pastikan hanya unlock kalau semua jawaban benar
+        if (allAnswersCorrect)
+        {
+            Debug.Log("[QuizManager] Semua pertanyaan benar — membuka Pos berikutnya!");
+            PosManager.instance.UnlockNextPos(); // 👈 ini yang menyalakan NPC Pos 2
+        }
+    }
+
 }

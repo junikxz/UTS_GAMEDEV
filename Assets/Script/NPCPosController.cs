@@ -6,6 +6,7 @@ public class NPCPosController : MonoBehaviour
     public DialogueData dialogAwal;
     public bool isPosSelesai = false;
     public GameObject tandaSelesai;
+    public int posIndex;
 
     private bool playerInRange = false;
     private bool hasInteracted = false; // setelah true, prompt tidak akan muncul lagi
@@ -70,12 +71,10 @@ public class NPCPosController : MonoBehaviour
         if (quizLogic == null) quizLogic = GetComponent<BaseQuizLogic>();
         quizLogic.StartQuiz();
     }
-
     public string AmbilPetunjuk()
     {
         if (quizLogic == null) quizLogic = GetComponent<BaseQuizLogic>();
         if (quizLogic is MultipleChoiceQuiz mcq) return mcq.quizData.petunjukBerikutnya;
-        if (quizLogic is GuessPictureQuiz gpq) return gpq.quizData.petunjukBerikutnya;
         return "Petunjuk tidak ditemukan.";
     }
 
@@ -83,7 +82,25 @@ public class NPCPosController : MonoBehaviour
     {
         isPosSelesai = true;
         if (tandaSelesai != null) tandaSelesai.SetActive(true);
+        Debug.Log("Pos selesai: " + gameObject.name);
+
+        // Panggil PosManager buat buka pos berikutnya
+        PosManager.instance.UnlockNextPos();
+
+
         // Jika kamu mau mengizinkan prompt muncul lagi setelah menyelesaikan pos,
         // tambahkan: hasInteracted = false;  di sini.
     }
+
+    public void ResetInteraction()
+    {
+        hasInteracted = false;
+
+        // Jika player sedang di range, tampilkan prompt lagi
+        if (playerInRange && !isPosSelesai)
+        {
+            InteractionManager.instance.ShowInteractPrompt();
+        }
+    }
+
 }
