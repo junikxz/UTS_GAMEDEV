@@ -1,23 +1,24 @@
+// NPCPosController.cs (VERSI BARU)
 using UnityEngine;
 
 [RequireComponent(typeof(SphereCollider))]
+[RequireComponent(typeof(BaseQuizLogic))] // Wajibkan setiap NPC punya script kuis
 public class NPCPosController : MonoBehaviour
 {
     public DialogueData dialogAwal;
     public bool isPosSelesai = false;
     public GameObject tandaSelesai;
-    public int posIndex;
 
     private bool playerInRange = false;
-    private bool hasInteracted = false; // setelah true, prompt tidak akan muncul lagi
+    private bool hasInteracted = false;
     private BaseQuizLogic quizLogic;
 
     void Awake()
     {
         GetComponent<SphereCollider>().isTrigger = true;
-        quizLogic = GetComponent<BaseQuizLogic>(); // tambahkan ini!
+        // Otomatis mencari script kuis apa pun yang terpasang
+        quizLogic = GetComponent<BaseQuizLogic>();
     }
-
 
     void Start()
     {
@@ -26,23 +27,45 @@ public class NPCPosController : MonoBehaviour
 
     void Update()
     {
-        // Trigger dialog hanya jika player di range, tekan E, belum interaksi, dan tidak sedang interaksi
         if (playerInRange && Input.GetKeyDown(KeyCode.E) && !hasInteracted && !InteractionManager.instance.isInteracting)
         {
-            hasInteracted = true; // KUNCI: setelah ini prompt tidak akan muncul lagi
+            hasInteracted = true;
             InteractionManager.instance.HideInteractPrompt();
             InteractionManager.instance.StartInteraction(this);
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    // Dipanggil oleh InteractionManager
+    public void JalankanKuis()
     {
-        if (!other.CompareTag("Player")) return;
+        if (quizLogic != null)
+        {
+            quizLogic.StartQuiz();
+        }
+        else
+        {
+            Debug.LogError($"Tidak ada script kuis (turunan BaseQuizLogic) pada {gameObject.name}!");
+        }
+    }
+    
+    // Dipanggil oleh InteractionManager setelah kuis berhasil
+    public void SelesaikanPos()
+    {
         if (isPosSelesai) return;
 
-        playerInRange = true;
+        isPosSelesai = true;
+        if (tandaSelesai != null) tandaSelesai.SetActive(true);
+        Debug.Log("Pos selesai: " + gameObject.name);
+        
+        // Memberi tahu PosManager untuk memunculkan NPC berikutnya
+        PosManager.instance.UnlockNextPos();
+    }
 
-        // Tampilkan prompt hanya jika belum pernah interaksi dan tidak sedang interaksi
+    #region Interaksi dan Trigger
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Player") || isPosSelesai) return;
+        playerInRange = true;
         if (!hasInteracted && !InteractionManager.instance.isInteracting)
         {
             InteractionManager.instance.ShowInteractPrompt();
@@ -52,55 +75,14 @@ public class NPCPosController : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-
         playerInRange = false;
-
-        // Saat keluar, sembunyikan prompt.
         InteractionManager.instance.HideInteractPrompt();
-
-        // NOTE: kita TIDAK mereset hasInteracted di sini.
-        // Jika kamu ingin agar setelah keluar area prompt bisa muncul lagi,
-        // kamu harus mereset hasInteracted di tempat yang tepat.
-    }
-
-    // --- Fungsi Kuis tetap sama ---
-    void AwakeQuiz() { quizLogic = GetComponent<BaseQuizLogic>(); }
-
-    public void JalankanKuis()
-    {
-        if (quizLogic == null) quizLogic = GetComponent<BaseQuizLogic>();
-        quizLogic.StartQuiz();
-    }
-    public string AmbilPetunjuk()
-    {
-        if (quizLogic == null) quizLogic = GetComponent<BaseQuizLogic>();
-        if (quizLogic is MultipleChoiceQuiz mcq) return mcq.quizData.petunjukBerikutnya;
-        return "Petunjuk tidak ditemukan.";
-    }
-
-    public void SelesaikanPos()
-    {
-        isPosSelesai = true;
-        if (tandaSelesai != null) tandaSelesai.SetActive(true);
-        Debug.Log("Pos selesai: " + gameObject.name);
-
-        // Panggil PosManager buat buka pos berikutnya
-        PosManager.instance.UnlockNextPos();
-
-
-        // Jika kamu mau mengizinkan prompt muncul lagi setelah menyelesaikan pos,
-        // tambahkan: hasInteracted = false;  di sini.
     }
 
     public void ResetInteraction()
     {
         hasInteracted = false;
-
-        // Jika player sedang di range, tampilkan prompt lagi
-        if (playerInRange && !isPosSelesai)
-        {
-            InteractionManager.instance.ShowInteractPrompt();
-        }
+        if (playerInRange && !isPosSelesai) InteractionManager.instance.ShowInteractPrompt();
     }
-
+    #endregion
 }
