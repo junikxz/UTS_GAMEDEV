@@ -3,15 +3,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class QuizManager : MonoBehaviour
+public class QuizManager : BaseQuizLogic 
 {
-    [Header("UI References")]
+    [Header("UI References (Milik Kuis Ini)")]
     public GameObject quizPanel;
-    public GameObject preQuizPanel;
-    public GameObject feedbackPanel;
     public TextMeshProUGUI questionText;
-    public TextMeshProUGUI timerText;
-    public TextMeshProUGUI feedbackText;
+    public TextMeshProUGUI timerText; // PASTIKAN INI DIISI DI INSPECTOR
     public Button[] optionButtons;
 
     [System.Serializable]
@@ -36,36 +33,44 @@ public class QuizManager : MonoBehaviour
     public Color wrongColor = Color.red;
     public Color defaultColor = Color.white;
 
-    [Header("Reward System")]
-    public int rewardCoins = 100;
-    private bool allAnswersCorrect = true;
+    void Start()
+    {
+        if (quizPanel != null)
+        {
+            quizPanel.SetActive(false);
+        }
+    }
 
     void Update()
     {
+        // Hanya update timer jika isCountingDown aktif
         if (isCountingDown)
         {
             currentTime -= Time.deltaTime;
-            timerText.text = Mathf.CeilToInt(currentTime).ToString();
+            
+            // Pastikan timerText tidak null sebelum digunakan
+            if (timerText != null) 
+            {
+                timerText.text = Mathf.CeilToInt(currentTime).ToString();
+            }
 
             if (currentTime <= 0)
             {
-                Debug.Log("⏰ Waktu habis! Kembali ke preQuizPanel...");
                 isCountingDown = false;
-                allAnswersCorrect = false; // gagal
-                ReturnToPreQuiz();
+                CompleteQuiz(false, "⏰ Waktu habis! Coba lagi.");
             }
         }
     }
 
-    public void StartQuiz()
+    public override void StartQuiz()
     {
-        Debug.Log("✅ StartQuiz() dipanggil!");
-        quizPanel.SetActive(true);
-        preQuizPanel.SetActive(false);
-        feedbackPanel.SetActive(false);
+        Debug.Log("✅ Memulai Kuis Pilihan Ganda!");
+        
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
+        quizPanel.SetActive(true);
         currentQuestionIndex = 0;
-        allAnswersCorrect = true;
         DisplayNextQuestion();
     }
 
@@ -73,7 +78,7 @@ public class QuizManager : MonoBehaviour
     {
         if (currentQuestionIndex >= questions.Count)
         {
-            EndQuiz();
+            CompleteQuiz(true, "Selamat!");
             return;
         }
 
@@ -87,83 +92,57 @@ public class QuizManager : MonoBehaviour
             int index = i;
             optionButtons[i].onClick.AddListener(() => OnAnswerSelected(index));
             optionButtons[i].image.color = defaultColor;
+            optionButtons[i].interactable = true; // Aktifkan kembali tombol
         }
 
-        // Reset timer setiap pertanyaan baru
         currentTime = timePerQuestion;
-        isCountingDown = true;
+        isCountingDown = true; // Timer mulai berjalan di sini
     }
 
     void OnAnswerSelected(int index)
     {
         if (!isCountingDown) return;
-
-        isCountingDown = false;
+        
+        // Hentikan timer & nonaktifkan semua tombol agar tidak bisa diklik ganda
+        isCountingDown = false; 
+        foreach (var btn in optionButtons)
+        {
+            btn.interactable = false;
+        }
+        
         Question q = questions[currentQuestionIndex];
         bool isCorrect = (index == q.correctAnswerIndex);
 
         if (isCorrect)
         {
             optionButtons[index].image.color = correctColor;
-            Debug.Log("✅ Jawaban benar!");
-            Invoke(nameof(NextQuestion), 1.0f);
+            currentQuestionIndex++;
+            Invoke(nameof(DisplayNextQuestion), 1.2f); // Beri jeda 1.2 detik
         }
         else
         {
             optionButtons[index].image.color = wrongColor;
-            Debug.Log("❌ Jawaban salah!");
-            allAnswersCorrect = false;
-            Invoke(nameof(ReturnToPreQuiz), 1.0f);
+            Invoke(nameof(FailQuiz), 1.2f); 
         }
     }
 
-    void NextQuestion()
+    void FailQuiz()
     {
-        currentQuestionIndex++;
-        DisplayNextQuestion();
+        CompleteQuiz(false, "Jawaban salah! Coba lagi.");
     }
 
-    void ReturnToPreQuiz()
+    void CompleteQuiz(bool success, string reason)
     {
-        quizPanel.SetActive(false);
-        preQuizPanel.SetActive(true);
-    }
-
-    void EndQuiz()
-    {
+        isCountingDown = false;
         quizPanel.SetActive(false);
 
-        if (allAnswersCorrect)
+        if (success)
         {
-            int currentCoins = PlayerPrefs.GetInt("coins", 0);
-            currentCoins += rewardCoins;
-            PlayerPrefs.SetInt("coins", currentCoins);
-            PlayerPrefs.Save();
-
-            feedbackPanel.SetActive(true);
-            feedbackText.text = $"Selamat! Kamu menjawab semua pertanyaan dengan benar! Silahkan pergi ke Pos 2 sesuai petunjuk yang diberikan dan selesaikan soal medium!\n\n+{rewardCoins} Koin";
-
-            // 🔁 Update tampilan koin di pojok layar
-            FindObjectOfType<CoinDisplayManager>()?.RefreshCoins();
+            OnQuizSuccess();
         }
-
         else
         {
-            // Kalau ada yang salah, langsung kembali ke preQuizPanel
-            preQuizPanel.SetActive(true);
+            OnQuizFailed(reason);
         }
     }
-
-    public void CloseFeedback()
-    {
-        feedbackPanel.SetActive(false);
-
-        // ✅ Pastikan hanya unlock kalau semua jawaban benar
-        if (allAnswersCorrect)
-        {
-            Debug.Log("[QuizManager] Semua pertanyaan benar — membuka Pos berikutnya!");
-            PosManager.instance.UnlockNextPos(); // 👈 ini yang menyalakan NPC Pos 2
-        }
-    }
-
 }

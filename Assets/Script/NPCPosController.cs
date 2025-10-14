@@ -1,12 +1,13 @@
-﻿using UnityEngine;
+// NPCPosController.cs (VERSI BARU)
+using UnityEngine;
 
 [RequireComponent(typeof(SphereCollider))]
+[RequireComponent(typeof(BaseQuizLogic))] // Wajibkan setiap NPC punya script kuis
 public class NPCPosController : MonoBehaviour
 {
     public DialogueData dialogAwal;
     public bool isPosSelesai = false;
     public GameObject tandaSelesai;
-    public int posIndex;
 
     private bool playerInRange = false;
     private bool hasInteracted = false;
@@ -71,11 +72,37 @@ public class NPCPosController : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    // Dipanggil oleh InteractionManager
+    public void JalankanKuis()
     {
-        if (!other.CompareTag("Player")) return;
+        if (quizLogic != null)
+        {
+            quizLogic.StartQuiz();
+        }
+        else
+        {
+            Debug.LogError($"Tidak ada script kuis (turunan BaseQuizLogic) pada {gameObject.name}!");
+        }
+    }
+    
+    // Dipanggil oleh InteractionManager setelah kuis berhasil
+    public void SelesaikanPos()
+    {
         if (isPosSelesai) return;
 
+        isPosSelesai = true;
+        if (tandaSelesai != null) tandaSelesai.SetActive(true);
+        Debug.Log("Pos selesai: " + gameObject.name);
+        
+        // Memberi tahu PosManager untuk memunculkan NPC berikutnya
+        PosManager.instance.UnlockNextPos();
+    }
+
+    #region Interaksi dan Trigger
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Player") || isPosSelesai) return;
+        playerInRange = true;
         playerInRange = true;
         player = other.transform;
 
@@ -94,7 +121,6 @@ public class NPCPosController : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-
         playerInRange = false;
 
         // Matikan animasi bicara saat player menjauh
@@ -133,6 +159,10 @@ public class NPCPosController : MonoBehaviour
     public void ResetInteraction()
     {
         hasInteracted = false;
+        if (playerInRange && !isPosSelesai) InteractionManager.instance.ShowInteractPrompt();
+    }
+    #endregion
+}
 
         if (playerInRange && !isPosSelesai)
         {

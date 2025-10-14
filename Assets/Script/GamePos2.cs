@@ -1,121 +1,167 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections; // ✨ Perlu ini untuk Coroutine
 
-public class GamePos2 : MonoBehaviour
+public class GamePos2 : BaseQuizLogic
 {
-    [Header("UI")]
+    [Header("UI Panel")]
     public GameObject miniGamePanel;
-    public Image questionImage;
-    public TMP_InputField answerInput;
+
     public Button submitButton;
+    public TMP_InputField answerInput;
+    public RawImage questionImage;
     public TextMeshProUGUI timerText;
-    public GameObject feedbackPanel;
-    public TextMeshProUGUI feedbackText;
 
     [System.Serializable]
-    public class Question
-    {
-        public Sprite image;
-        public string correctAnswer;
-    }
-
-    [Header("Daftar Soal Kebangsaan")]
+    public class Question { public Texture image; public string correctAnswer; }
     public Question[] questions;
-    private int currentIndex = 0;
 
-    [Header("Timer Settings")]
     public float timePerQuestion = 20f;
     private float currentTime;
     private bool isPlaying = false;
+    private int currentIndex = 0;
 
-    private bool allCorrect = true;
+    [Header("Feedback Colors")] // ✨ Baru: Warna untuk feedback
+    public Color correctColor = Color.green;
+    public Color wrongColor = Color.red;
+    public Color defaultInputColor = Color.white; // Warna default input field
+    public float feedbackDelay = 1.0f; // Jeda sebelum next/end
 
     void Start()
     {
         miniGamePanel.SetActive(false);
-        feedbackPanel.SetActive(false);
-        submitButton.onClick.AddListener(OnSubmit);
+        if (submitButton != null) submitButton.onClick.AddListener(OnSubmit);
+        answerInput.onEndEdit.AddListener(OnInputEndEdit); // ✨ Baru: Handle input selesai edit
     }
 
-    void Update()
+    public override void StartQuiz()
     {
-        if (!isPlaying) return;
+        // Beri tahu Player Controller untuk berhenti mengunci kursor
+        // Pastikan Anda sudah punya PlayerController.isUIActive di Player Controller Anda
+        // PlayerController.isUIActive = true; 
 
-        currentTime -= Time.deltaTime;
-        timerText.text = Mathf.CeilToInt(currentTime).ToString();
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
-        if (currentTime <= 0)
-        {
-            isPlaying = false;
-            feedbackText.text = "⏰ Waktu habis! Coba lagi dari awal pos.";
-            feedbackPanel.SetActive(true);
-            miniGamePanel.SetActive(false);
-        }
-    }
-
-    public void StartMiniGame()
-    {
         currentIndex = 0;
         miniGamePanel.SetActive(true);
-        feedbackPanel.SetActive(false);
-        ShowQuestion();
         isPlaying = true;
+        ShowQuestion();
     }
 
-    void ShowQuestion()
+    // ✨ Baru: Memungkinkan submit dengan Enter
+    void OnInputEndEdit(string text)
     {
-        if (currentIndex >= questions.Length)
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            EndMiniGame();
-            return;
+            OnSubmit();
         }
-
-        questionImage.sprite = questions[currentIndex].image;
-        answerInput.text = "";
-        currentTime = timePerQuestion;
     }
 
     void OnSubmit()
     {
+        if (!isPlaying) return; // Pengaman agar tidak submit saat tidak bermain
+
+        // Hentikan timer dan nonaktifkan input & tombol untuk mencegah submit ganda
+        isPlaying = false;
+        answerInput.interactable = false;
+        submitButton.interactable = false;
+        
         string playerAnswer = answerInput.text.Trim().ToLower();
         string correctAnswer = questions[currentIndex].correctAnswer.Trim().ToLower();
 
+        Debug.Log($"Player mengetik: [{playerAnswer}]");
+        Debug.Log($"Jawaban benar seharusnya: [{correctAnswer}]");
+
         if (playerAnswer == correctAnswer)
         {
-            currentIndex++;
-            if (currentIndex < questions.Length)
-                ShowQuestion();
-            else
-                EndMiniGame();
+            Debug.Log("Hasil: BENAR!");
+            StartCoroutine(CorrectAnswerFeedback()); // ✨ Panggil coroutine baru
         }
         else
         {
-            allCorrect = false;
-            feedbackText.text = "❌ Jawaban salah! Coba lagi dari awal pos.";
-            feedbackPanel.SetActive(true);
-            miniGamePanel.SetActive(false);
-            isPlaying = false;
+            Debug.Log("Hasil: SALAH!");
+            StartCoroutine(WrongAnswerFeedback()); // ✨ Panggil coroutine baru
         }
     }
 
-    void EndMiniGame()
+    // ✨ Baru: Coroutine untuk feedback jawaban benar
+    IEnumerator CorrectAnswerFeedback()
+    {
+        answerInput.image.color = correctColor; // Ubah warna input field
+        yield return new WaitForSeconds(feedbackDelay); // Tunggu sejenak
+
+        answerInput.image.color = defaultInputColor; // Kembalikan warna
+        answerInput.interactable = true; // Aktifkan kembali input field
+        submitButton.interactable = true; // Aktifkan kembali tombol submit
+
+        currentIndex++;
+        if (currentIndex >= questions.Length)
+        {
+            EndMiniGame(true); // Semua soal terjawab
+        }
+        else
+        {
+            ShowQuestion(); // Lanjut soal berikutnya
+            isPlaying = true; // Lanjutkan permainan
+        }
+    }
+
+    // ✨ Baru: Coroutine untuk feedback jawaban salah
+    IEnumerator WrongAnswerFeedback()
+    {
+        answerInput.image.color = wrongColor; // Ubah warna input field
+        yield return new WaitForSeconds(feedbackDelay); // Tunggu sejenak
+
+        // Langsung akhiri game dengan status gagal
+        EndMiniGame(false); 
+    }
+
+    void EndMiniGame(bool success)
     {
         isPlaying = false;
         miniGamePanel.SetActive(false);
 
-        if (allCorrect)
+        // Kembalikan kontrol kursor (jika PlayerController Anda sudah disetting)
+        // PlayerController.isUIActive = false; 
+        
+        // Pastikan input field dan tombol kembali aktif (jika ingin bisa berinteraksi di preQuizPanel)
+        answerInput.interactable = true;
+        submitButton.interactable = true;
+        answerInput.image.color = defaultInputColor;
+
+        if (success)
         {
-            feedbackPanel.SetActive(true);
-            feedbackText.text = "🎉 Hebat! Kamu mengenal budaya Nusantara dengan baik!\nSilakan menuju Pos 3.";
-            
-            // 🚩 Pemicu munculnya POS berikutnya
-            PosManager.instance.UnlockNextPos();
+            OnQuizSuccess();
+        }
+        else
+        {
+            OnQuizFailed("❌ Jawaban salah! Coba lagi dari awal pos.");
         }
     }
 
-    public void CloseFeedback()
+    #region Logika Kuis (Tidak berubah secara fungsional)
+    void Update()
     {
-        feedbackPanel.SetActive(false);
+        if (!isPlaying) return; // Hanya update timer jika isPlaying aktif
+        currentTime -= Time.deltaTime;
+        if (timerText != null) // Pengaman jika timerText belum di-assign
+        {
+            timerText.text = Mathf.CeilToInt(currentTime).ToString();
+        }
+        if (currentTime <= 0)
+        {
+            EndMiniGame(false);
+        }
     }
+    void ShowQuestion()
+    {
+        questionImage.texture = questions[currentIndex].image;
+        answerInput.text = ""; // Kosongkan input field
+        answerInput.ActivateInputField(); // Fokuskan input field agar bisa langsung mengetik
+        currentTime = timePerQuestion;
+        isPlaying = true; // Pastikan isPlaying aktif
+    }
+    #endregion
 }

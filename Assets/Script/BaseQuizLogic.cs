@@ -1,22 +1,22 @@
+// BaseQuizLogic.cs (VERSI FINAL YANG BENAR)
 using UnityEngine;
 
-// abstract class tidak bisa ditempel langsung ke objek, hanya untuk diwarisi
 public abstract class BaseQuizLogic : MonoBehaviour
 {
-    // Setiap kuis harus punya fungsi untuk memulai
+    // Setiap script kuis WAJIB memiliki fungsi ini
     public abstract void StartQuiz();
 
-    // Fungsi ini dipanggil dari luar (InteractionManager) jika kuis berhasil
+    // Fungsi ini dipanggil dari script kuis jika BERHASIL
     public virtual void OnQuizSuccess()
     {
-        Debug.Log("Kuis Berhasil!");
-        InteractionManager.instance.ShowClue(); // Tampilkan petunjuk
+        // Panggil handler sukses di InteractionManager
+        InteractionManager.instance.HandleQuizSuccess();
     }
 
-    // Fungsi ini dipanggil jika kuis gagal
+    // Fungsi ini dipanggil dari script kuis jika GAGAL
     public virtual void OnQuizFailed(string reason)
     {
-        Debug.Log("Kuis Gagal: " + reason);
-        InteractionManager.instance.ShowFeedback(reason); // Tampilkan feedback
+        // Panggil handler gagal di InteractionManager
+        InteractionManager.instance.HandleQuizFailure(reason);
     }
 }
