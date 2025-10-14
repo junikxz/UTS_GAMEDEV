@@ -1,70 +1,99 @@
 using UnityEngine;
 
-// Atribut ini memastikan objek selalu punya komponen yang dibutuhkan
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(Animator))]
 public class Sc_Boy1 : MonoBehaviour
 {
-    // Pengaturan bisa diubah di Inspector
-    public float walkSpeed = 5f;
-    public float runSpeed = 9f;
-    public float turnSmoothTime = 0.1f;
+    [Header("Movement Settings")]
+    public float walkSpeed = 1f;
+    public float runSpeed = 7f;
+    public float rotationSpeed = 10f; // Kecepatan rotasi karakter
+    public float gravity = -9.81f;
+    public float jumpForce = 3f;
 
-    // Komponen yang dibutuhkan
-    private Animator anim;
+    [Header("References")]
+    public Sc_Camera cameraScript; // Reference ke script kamera
+
     private CharacterController controller;
-    private Transform cam;
+    private Animator anim;
+    private Vector3 velocity;
+    private Transform cameraTransform;
 
-    // Variabel internal untuk rotasi halus
-    private float turnSmoothVelocity;
+    // Attack
+    private float comboAtk = 0f;
+    private float lastAtk = 0f;
 
     void Start()
     {
-        // Ambil semua komponen saat game dimulai
-        anim = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
-        cam = Camera.main.transform;
+        anim = GetComponent<Animator>();
 
-        // Kunci kursor di tengah layar
+        // Dapatkan reference kamera
+        if (cameraScript == null)
+            cameraScript = FindObjectOfType<Sc_Camera>();
+
+        if (cameraScript != null)
+            cameraTransform = cameraScript.transform;
+        else
+            cameraTransform = Camera.main.transform;
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     void Update()
     {
-        // 1. DAPATKAN INPUT
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
-        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
+        HandleMovement();
+    }
 
-        bool isMoving = direction.magnitude >= 0.1f;
-        bool shiftHeld = Input.GetKey(KeyCode.LeftShift);
-        bool isSprinting = isMoving && shiftHeld; // langsung sprint jika shift ditekan
+    void HandleMovement()
+    {
 
-        // 2. GERAK & ROTASI
+        // Input WASD
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
+        Vector3 inputDirection = new Vector3(h, 0f, v).normalized;
+
+        bool isMoving = inputDirection.magnitude >= 0.1f;
+        bool isRunning = isMoving && Input.GetKey(KeyCode.LeftShift) ;
+
         if (isMoving)
         {
-            // Hitung arah berdasarkan kamera
-            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
-            transform.rotation = Quaternion.Euler(0f, angle, 0f);
+            // Hitung arah gerakan berdasarkan kamera
+            Vector3 cameraForward = cameraTransform.forward;
+            Vector3 cameraRight = cameraTransform.right;
 
-            // Pilih kecepatan
-            float currentSpeed = isSprinting ? runSpeed : walkSpeed;
+            // Hilangkan komponen Y
+            cameraForward.y = 0;
+            cameraRight.y = 0;
+            cameraForward.Normalize();
+            cameraRight.Normalize();
+
+            // Hitung arah gerakan relatif terhadap kamera
+            Vector3 moveDirection = (cameraForward * inputDirection.z + cameraRight * inputDirection.x).normalized;
+
+            // Rotasi karakter menghadap arah gerakan
+            if (moveDirection != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            }
 
             // Gerakkan karakter
-            Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-            controller.Move(moveDir.normalized * currentSpeed * Time.deltaTime);
+            float speed = isRunning ? runSpeed : walkSpeed;
+            controller.Move(moveDirection * speed * Time.deltaTime);
 
-            // 3. ANIMASI
-            anim.SetBool("isRun", isSprinting);
-            anim.SetBool("isJalan", !isSprinting);
+            // Update animasi
+            anim.SetBool("isJalan", !isRunning);
+            anim.SetBool("isRun", isRunning);
         }
         else
         {
-            // Diam
-            anim.SetBool("isRun", false);
             anim.SetBool("isJalan", false);
+            anim.SetBool("isRun", false);
         }
+
+        velocity.y += gravity * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
     }
 }
