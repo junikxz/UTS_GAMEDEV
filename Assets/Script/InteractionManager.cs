@@ -34,10 +34,6 @@ public class InteractionManager : MonoBehaviour
     public List<Button> mcqAnswerButtons;
 
     [Header("Panel Kuis: Tebak Gambar")]
-    public GameObject guessPicturePanel;
-    public Image guessPictureImage;
-    public TMP_InputField guessPictureInputField;
-    public Button guessPictureSubmitButton;
 
     [Header("Pengaturan Umum")]
     public float typingSpeed = 0.04f;
@@ -203,4 +199,26 @@ public class InteractionManager : MonoBehaviour
         isInteracting = false;
         HideCursor();
     }
+
+    public void CancelQuiz()
+    {
+        if (preQuizPanel != null)
+            preQuizPanel.SetActive(false);
+
+        // Reset state interaksi
+        isInteracting = false;
+        HideCursor();
+
+        // Reset current NPC agar prompt bisa muncul lagi
+        if (currentNPC != null)
+        {
+            currentNPC.ResetInteraction();
+            currentNPC = null;
+        }
+
+        Debug.Log("Kuis dibatalkan. Pemain bisa berinteraksi lagi.");
+    }
+
+
+
 }
