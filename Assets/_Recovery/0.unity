@@ -130,7 +130,10 @@ GameObject:
   - component: {fileID: 1530795273}
   - component: {fileID: 1530795272}
   - component: {fileID: 1530795271}
+<<<<<<< HEAD
   - component: {fileID: 1530795274}
+=======
+>>>>>>> origin/main
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -212,6 +215,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+<<<<<<< HEAD
 --- !u!114 &1530795274
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,6 +260,8 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+=======
+>>>>>>> origin/main
 --- !u!1 &1913484431
 GameObject:
   m_ObjectHideFlags: 0
@@ -266,7 +272,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1913484433}
   - component: {fileID: 1913484432}
+<<<<<<< HEAD
   - component: {fileID: 1913484434}
+=======
+>>>>>>> origin/main
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -354,6 +363,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+<<<<<<< HEAD
 --- !u!114 &1913484434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -377,6 +387,8 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+=======
+>>>>>>> origin/main
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
