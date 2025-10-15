@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: Dialogue_Pos1
   m_EditorClassIdentifier: 
   kalimat:
-  - Halo, selamat datang di Pos 1, Di sini kita akan bermain pilihan ganda
+  - Halooo! Selamat datang di POS 1, Di sini kita akan sedikit bermain tentang pengetahuan
+    sejarah! Kamu tinggal pilih jawaban yang menurut kamu sesuai yaa!
