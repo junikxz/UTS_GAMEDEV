@@ -102,7 +102,7 @@ public class InteractionManager : MonoBehaviour
     
     // ... (Sisa kode untuk dialog, prompt, dll. tidak perlu diubah) ...
     #region Logika Dialog dan Interaksi Lainnya
-    private void ShowCursor() { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
+    public void ShowCursor() { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
     private void HideCursor() { Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false; }
     public void ShowInteractPrompt() { if (interactPromptPanel) interactPromptPanel.SetActive(true); }
     public void HideInteractPrompt() { if (interactPromptPanel) interactPromptPanel.SetActive(false); }

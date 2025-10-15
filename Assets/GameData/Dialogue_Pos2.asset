@@ -13,4 +13,6 @@ MonoBehaviour:
   m_Name: Dialogue_Pos2
   m_EditorClassIdentifier: 
   kalimat:
-  - Halo, selamat datang di pos 2, kamu di sini akan bermain tebak gambar pahlawan!
+  - Wahh hebat banget kamu berhasil nemu aku lagi! Selamat datang yaa di POS 2. Di
+    sini kita akan sedikit bermain tantangan menebak gambar! Tenang aja, levelnya
+    masih medium kok. Pastikan kamu mengisinya dengan huruf kecil semua yaa!

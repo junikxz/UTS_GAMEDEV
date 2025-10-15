@@ -1,29 +1,31 @@
-// NPCPosController.cs (VERSI BARU)
 using UnityEngine;
 
 [RequireComponent(typeof(SphereCollider))]
 [RequireComponent(typeof(BaseQuizLogic))] // Wajibkan setiap NPC punya script kuis
 public class NPCPosController : MonoBehaviour
 {
+    [Header("Data & Status")]
     public DialogueData dialogAwal;
     public bool isPosSelesai = false;
     public GameObject tandaSelesai;
 
+    [Header("Pengaturan Animasi & Rotasi")]
+    public float lookSpeed = 5f; // Kecepatan NPC menengok
+
+    // Variabel internal
     private bool playerInRange = false;
     private bool hasInteracted = false;
     private BaseQuizLogic quizLogic;
-
-    // Tambahan animasi dan rotasi
     private Animator anim;
     private Transform player;
-    public float lookSpeed = 5f; // kecepatan menengok
     private bool isTalking = false;
 
     void Awake()
     {
         GetComponent<SphereCollider>().isTrigger = true;
+        // ✨ DIGABUNGKAN: Mengambil semua komponen yang diperlukan
         quizLogic = GetComponent<BaseQuizLogic>();
-        anim = GetComponent<Animator>(); // ambil komponen animator
+        anim = GetComponent<Animator>(); 
     }
 
     void Start()
@@ -33,12 +35,11 @@ public class NPCPosController : MonoBehaviour
 
     void Update()
     {
-        // Jika player ada di area dan belum selesai
+        // ✨ DARI 'main': NPC akan selalu menengok ke arah player jika di dalam jangkauan
         if (playerInRange && player != null && !isPosSelesai)
         {
-            // NPC menengok ke arah player
             Vector3 direction = (player.position - transform.position).normalized;
-            direction.y = 0; // jangan miring ke atas/bawah
+            direction.y = 0; // Pastikan NPC tidak miring ke atas/bawah
             if (direction.magnitude > 0.1f)
             {
                 Quaternion lookRotation = Quaternion.LookRotation(direction);
@@ -46,33 +47,27 @@ public class NPCPosController : MonoBehaviour
             }
         }
 
-        // Jika player di range dan tekan E untuk mulai interaksi
+        // Logika untuk memulai interaksi saat 'E' ditekan
         if (playerInRange && Input.GetKeyDown(KeyCode.E) && !hasInteracted && !InteractionManager.instance.isInteracting)
         {
             hasInteracted = true;
             InteractionManager.instance.HideInteractPrompt();
             InteractionManager.instance.StartInteraction(this);
 
-            // Aktifkan animasi bicara
-            if (anim != null)
-            {
-                isTalking = true;
-                anim.SetBool("isTalk", true);
-            }
+            // ✨ DARI 'main': Aktifkan animasi bicara saat dialog dimulai
+            isTalking = true;
+            if (anim != null) anim.SetBool("isTalk", true);
         }
 
-        // Jika sedang bicara dan interaksi selesai
+        // ✨ DARI 'main': Hentikan animasi bicara setelah dialog/kuis selesai
         if (isTalking && !InteractionManager.instance.isInteracting)
         {
             isTalking = false;
-            if (anim != null)
-            {
-                anim.SetBool("isTalk", false);
-            }
+            if (anim != null) anim.SetBool("isTalk", false);
         }
     }
 
-    // Dipanggil oleh InteractionManager
+    // Dipanggil oleh InteractionManager untuk memulai kuis
     public void JalankanKuis()
     {
         if (quizLogic != null)
@@ -95,22 +90,24 @@ public class NPCPosController : MonoBehaviour
         Debug.Log("Pos selesai: " + gameObject.name);
         
         // Memberi tahu PosManager untuk memunculkan NPC berikutnya
-        PosManager.instance.UnlockNextPos();
+        PosManager.instance.UnlockNextPos(); // Pastikan nama manager Anda benar
     }
 
-    #region Interaksi dan Trigger
+    // Dipanggil oleh InteractionManager jika kuis gagal/dibatalkan
+    public void ResetInteraction()
+    {
+        hasInteracted = false;
+        if (playerInRange && !isPosSelesai) InteractionManager.instance.ShowInteractPrompt();
+    }
+    
     private void OnTriggerEnter(Collider other)
     {
+        // ✨ DIGABUNGKAN: Mengambil guard clause dari 'livi_baru'
         if (!other.CompareTag("Player") || isPosSelesai) return;
-        playerInRange = true;
-        playerInRange = true;
-        player = other.transform;
 
-        // Aktifkan animasi bicara ringan (misal sapaan)
-        if (anim != null)
-        {
-            anim.SetBool("isTalk", true);
-        }
+        // ✨ DIGABUNGKAN: Mengambil logika dari 'main'
+        playerInRange = true;
+        player = other.transform; // Simpan transform player untuk rotasi
 
         if (!hasInteracted && !InteractionManager.instance.isInteracting)
         {
@@ -121,52 +118,17 @@ public class NPCPosController : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (!other.CompareTag("Player")) return;
-        playerInRange = false;
 
-        // Matikan animasi bicara saat player menjauh
-        if (anim != null)
+        // ✨ DIGABUNGKAN: Mengambil logika pembersihan dari 'main'
+        playerInRange = false;
+        player = null; // Hapus referensi player
+        
+        // Hentikan animasi bicara jika pemain menjauh saat belum berinteraksi
+        if (anim != null && !isTalking)
         {
             anim.SetBool("isTalk", false);
         }
-
-        player = null;
+        
         InteractionManager.instance.HideInteractPrompt();
-    }
-
-    // --- Fungsi Kuis tetap sama ---
-    public void JalankanKuis()
-    {
-        if (quizLogic == null) quizLogic = GetComponent<BaseQuizLogic>();
-        quizLogic.StartQuiz();
-    }
-
-    public string AmbilPetunjuk()
-    {
-        if (quizLogic == null) quizLogic = GetComponent<BaseQuizLogic>();
-        if (quizLogic is MultipleChoiceQuiz mcq) return mcq.quizData.petunjukBerikutnya;
-        return "Petunjuk tidak ditemukan.";
-    }
-
-    public void SelesaikanPos()
-    {
-        isPosSelesai = true;
-        if (tandaSelesai != null) tandaSelesai.SetActive(true);
-        Debug.Log("Pos selesai: " + gameObject.name);
-
-        PosManager.instance.UnlockNextPos();
-    }
-
-    public void ResetInteraction()
-    {
-        hasInteracted = false;
-        if (playerInRange && !isPosSelesai) InteractionManager.instance.ShowInteractPrompt();
-    }
-    #endregion
-}
-
-        if (playerInRange && !isPosSelesai)
-        {
-            InteractionManager.instance.ShowInteractPrompt();
-        }
     }
 }
