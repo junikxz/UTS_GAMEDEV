@@ -3,7 +3,7 @@ using UnityEngine;
 public class Sc_camera : MonoBehaviour
 {
     public Transform target; // Target yang akan diikuti (Pemain)
-    public Vector3 offset = new Vector3(0f, 5f, -7f); // Jarak kamera dari pemain (X, Atas, Belakang)
+    private Vector3 offset = new Vector3(0f, 2f, -3f); // Jarak kamera dari pemain (X, Atas, Belakang)
     public float smoothSpeed = 10f; // Kecepatan kamera mengikuti pemain
 
     // LateUpdate dipanggil setelah semua Update selesai.
