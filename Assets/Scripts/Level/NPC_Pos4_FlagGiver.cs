@@ -55,4 +55,6 @@ public class NPC_Pos4_FlagGiver : MonoBehaviour
 
     void Update()
     {
-        if (player
+        // if (player
+    }
+}
