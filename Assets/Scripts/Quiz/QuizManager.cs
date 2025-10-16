@@ -3,13 +3,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class QuizManager : MonoBehaviour
+public class QuizManager : BaseQuizLogic 
 {
-    [Header("UI References")]
+    [Header("UI References (Milik Kuis Ini)")]
     public GameObject quizPanel;
-    public GameObject preQuizPanel;
     public TextMeshProUGUI questionText;
-    public TextMeshProUGUI timerText;
+    public TextMeshProUGUI timerText; // PASTIKAN INI DIISI DI INSPECTOR
     public Button[] optionButtons;
 
     [System.Serializable]
@@ -34,27 +33,43 @@ public class QuizManager : MonoBehaviour
     public Color wrongColor = Color.red;
     public Color defaultColor = Color.white;
 
+    void Start()
+    {
+        if (quizPanel != null)
+        {
+            quizPanel.SetActive(false);
+        }
+    }
+
     void Update()
     {
+        // Hanya update timer jika isCountingDown aktif
         if (isCountingDown)
         {
             currentTime -= Time.deltaTime;
-            timerText.text = Mathf.CeilToInt(currentTime).ToString();
+            
+            // Pastikan timerText tidak null sebelum digunakan
+            if (timerText != null) 
+            {
+                timerText.text = Mathf.CeilToInt(currentTime).ToString();
+            }
 
             if (currentTime <= 0)
             {
-                Debug.Log("⏰ Waktu habis! Kembali ke preQuizPanel...");
                 isCountingDown = false;
-                ReturnToPreQuiz();
+                CompleteQuiz(false, "⏰ Waktu habis! Coba lagi.");
             }
         }
     }
 
-    public void StartQuiz()
+    public override void StartQuiz()
     {
-        Debug.Log("✅ StartQuiz() dipanggil!");
+        Debug.Log("✅ Memulai Kuis Pilihan Ganda!");
+        
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
         quizPanel.SetActive(true);
-        preQuizPanel.SetActive(false);
         currentQuestionIndex = 0;
         DisplayNextQuestion();
     }
@@ -63,7 +78,7 @@ public class QuizManager : MonoBehaviour
     {
         if (currentQuestionIndex >= questions.Count)
         {
-            EndQuiz();
+            CompleteQuiz(true, "Selamat!");
             return;
         }
 
@@ -77,50 +92,57 @@ public class QuizManager : MonoBehaviour
             int index = i;
             optionButtons[i].onClick.AddListener(() => OnAnswerSelected(index));
             optionButtons[i].image.color = defaultColor;
+            optionButtons[i].interactable = true; // Aktifkan kembali tombol
         }
 
-        // Mulai timer baru
         currentTime = timePerQuestion;
-        isCountingDown = true;
+        isCountingDown = true; // Timer mulai berjalan di sini
     }
 
     void OnAnswerSelected(int index)
     {
-        if (!isCountingDown) return; // biar gak bisa spam klik setelah timeout
-
-        isCountingDown = false;
+        if (!isCountingDown) return;
+        
+        // Hentikan timer & nonaktifkan semua tombol agar tidak bisa diklik ganda
+        isCountingDown = false; 
+        foreach (var btn in optionButtons)
+        {
+            btn.interactable = false;
+        }
+        
         Question q = questions[currentQuestionIndex];
         bool isCorrect = (index == q.correctAnswerIndex);
 
         if (isCorrect)
         {
             optionButtons[index].image.color = correctColor;
-            Debug.Log("✅ Jawaban benar!");
-            Invoke(nameof(NextQuestion), 1.0f);
+            currentQuestionIndex++;
+            Invoke(nameof(DisplayNextQuestion), 1.2f); // Beri jeda 1.2 detik
         }
         else
         {
             optionButtons[index].image.color = wrongColor;
-            Debug.Log("❌ Jawaban salah! Kembali ke preQuizPanel...");
-            Invoke(nameof(ReturnToPreQuiz), 1.0f);
+            Invoke(nameof(FailQuiz), 1.2f); 
         }
     }
 
-    void NextQuestion()
+    void FailQuiz()
     {
-        currentQuestionIndex++;
-        DisplayNextQuestion();
+        CompleteQuiz(false, "Jawaban salah! Coba lagi.");
     }
 
-    void ReturnToPreQuiz()
+    void CompleteQuiz(bool success, string reason)
     {
+        isCountingDown = false;
         quizPanel.SetActive(false);
-        preQuizPanel.SetActive(true);
-    }
 
-    void EndQuiz()
-    {
-        Debug.Log("🎉 Kuis selesai!");
-        quizPanel.SetActive(false);
+        if (success)
+        {
+            OnQuizSuccess();
+        }
+        else
+        {
+            OnQuizFailed(reason);
+        }
     }
 }

@@ -8,199 +8,159 @@ public class InteractionManager : MonoBehaviour
 {
     public static InteractionManager instance;
 
-    [Header("Panel Utama")]
+    [Header("Panel Umum")]
     public GameObject dialoguePanel;
-    public GameObject feedbackPanel;
-    public GameObject cluePanel;
     public GameObject preQuizPanel;
+    public GameObject interactPromptPanel;
+    public GameObject feedbackPanel;
 
-    [Header("Panel Pre-Quiz")]
-    public TextMeshProUGUI preQuizText;
-    [TextArea] public string preQuizMessage = "Apakah kamu siap memulai kuis?";
-    public Button startQuizButton; // opsional kalau kamu mau tombol muncul setelah teks selesai
-
-    [Header("UI Interaksi Jarak")]
-    public GameObject interactPromptPanel; // Panel "Tekan E untuk Bicara"
-
-    [Header("Komponen Dialog & Feedback")]
+    [Header("UI Komponen")]
     public TextMeshProUGUI dialogueText;
+    public TextMeshProUGUI preQuizText;
     public TextMeshProUGUI feedbackText;
-    public TextMeshProUGUI clueText;
+    [TextArea] public string preQuizMessage = "Apakah kamu siap?";
 
-    [Header("Panel Kuis: Pilihan Ganda")]
-    public GameObject multipleChoicePanel;
-    public QuizManager quizManager;
-    public TextMeshProUGUI mcqTimerText;
-    public List<Button> mcqAnswerButtons;
-
-    [Header("Panel Kuis: Tebak Gambar")]
-    public GameObject guessPicturePanel;
-    public Image guessPictureImage;
-    public TMP_InputField guessPictureInputField;
-    public Button guessPictureSubmitButton;
-
-    [Header("Pengaturan Umum")]
+    [Header("Pengaturan")]
     public float typingSpeed = 0.04f;
-    public float quizTimePerQuestion = 15f;
+    public int coinsPerQuiz = 100;
 
     // State
     public bool isInteracting { get; private set; }
-    private Queue<string> sentences;
     private NPCPosController currentNPC;
-    private bool isTyping = false;
-    private string currentSentence = "";
-
-    // Coroutine references (biar ga saling ganggu)
-    private Coroutine typingDialogueCoroutine;
-    private Coroutine typingPreQuizCoroutine;
+    private Queue<string> sentences;
+    private bool wasQuizSuccessful; // ✨ VARIABEL BARU untuk mengingat hasil kuis
 
     void Awake()
     {
         if (instance == null) instance = this;
         else Destroy(gameObject);
-
         sentences = new Queue<string>();
     }
 
-    // === Cursor & Prompt ===
-    private void ShowCursor() { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
-    private void HideCursor() { Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false; }
+    // === Sistem Penanganan Hasil Kuis (Diperbaiki) ===
+    public void HandleQuizSuccess()
+    {
+        if (currentNPC == null) return;
+        wasQuizSuccessful = true; // Ingat bahwa kuis berhasil
 
+        // --- Logika Penambahan Koin ---
+        int currentCoins = PlayerPrefs.GetInt("coins", 0);
+        currentCoins += coinsPerQuiz;
+        PlayerPrefs.SetInt("coins", currentCoins);
+        PlayerPrefs.Save();
+        CoinDisplayManager.instance.RefreshCoins();
+
+        // Siapkan pesan dan tampilkan panel
+        string successMessage = $"Selamat!\nKamu telah berhasil menyelesaikan Pos 1!\nSilahkan pergi ke pos 2 untuk menyelesaikan tantangan selanjutnya!\n\n+{coinsPerQuiz} Koin ditambahkan.";
+        feedbackText.text = successMessage;
+        feedbackPanel.SetActive(true);
+        ShowCursor(); // Tampilkan cursor agar bisa klik tombol
+    }
+
+    public void HandleQuizFailure(string reason)
+    {
+        if (currentNPC == null) return;
+        
+        Debug.Log("Kuis Gagal: " + reason + ". Kembali ke Pre-Quiz Panel.");
+
+        // Tampilkan cursor agar bisa klik tombol di preQuizPanel
+        ShowCursor();
+
+        // Aktifkan kembali preQuizPanel
+        preQuizPanel.SetActive(true);
+        
+        // Pastikan isInteracting tetap true agar pemain tidak bisa bergerak
+        isInteracting = true;
+    }
+
+    // ✨ FUNGSI BARU: Ini akan dipanggil oleh tombol "Tutup" Anda
+    public void CloseFeedbackPanel()
+    {
+        feedbackPanel.SetActive(false);
+        isInteracting = false;
+        HideCursor();
+
+        // Jalankan logika lanjutan setelah panel ditutup
+        if (wasQuizSuccessful)
+        {
+            // Jika kuis berhasil, selesaikan pos
+            if (currentNPC != null) {
+                currentNPC.SelesaikanPos();
+                currentNPC = null;
+            }
+        }
+        else
+        {
+            // Jika kuis gagal, reset interaksi
+            if(currentNPC != null) {
+                currentNPC.ResetInteraction();
+            }
+        }
+    }
+
+    // DIHAPUS: Coroutine ShowFeedbackAndProceed dan ShowFeedbackAndReset yang lama
+    
+    // ... (Sisa kode untuk dialog, prompt, dll. tidak perlu diubah) ...
+    #region Logika Dialog dan Interaksi Lainnya
+    public void ShowCursor() { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
+    private void HideCursor() { Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false; }
     public void ShowInteractPrompt() { if (interactPromptPanel) interactPromptPanel.SetActive(true); }
     public void HideInteractPrompt() { if (interactPromptPanel) interactPromptPanel.SetActive(false); }
 
-    // === Mulai Interaksi ===
-    public void StartInteraction(NPCPosController npc)
-    {
+    public void StartInteraction(NPCPosController npc) {
         isInteracting = true;
         currentNPC = npc;
         ShowCursor();
         StartDialogue(npc.dialogAwal);
     }
 
-    void StartDialogue(DialogueData dialogue)
-    {
+    void StartDialogue(DialogueData dialogue) {
         dialoguePanel.SetActive(true);
         sentences.Clear();
-        foreach (string sentence in dialogue.kalimat)
-            sentences.Enqueue(sentence);
-
+        foreach (string sentence in dialogue.kalimat) sentences.Enqueue(sentence);
         DisplayNextSentence();
     }
-
-    public void DisplayNextSentence()
+    
+    public void OnClickStartQuiz()
     {
-        if (isTyping)
+        preQuizPanel.SetActive(false);
+        isInteracting = false;
+        HideCursor();
+
+        if (currentNPC != null)
         {
-            // kalau user klik next pas efek ngetik → langsung tampil full
-            if (typingDialogueCoroutine != null)
-                StopCoroutine(typingDialogueCoroutine);
-
-            dialogueText.text = currentSentence;
-            isTyping = false;
-            return;
+            currentNPC.JalankanKuis();
         }
-
-        if (sentences.Count == 0)
-        {
-            EndDialogue();
-            return;
-        }
-
-        currentSentence = sentences.Dequeue();
-
-        if (typingDialogueCoroutine != null)
-            StopCoroutine(typingDialogueCoroutine);
-
-        typingDialogueCoroutine = StartCoroutine(TypeSentence(currentSentence));
     }
 
-    IEnumerator TypeSentence(string sentence)
-    {
-        isTyping = true;
-        dialogueText.text = "";
+    public void DisplayNextSentence() {
+        if (sentences.Count == 0) { EndDialogue(); return; }
+        StopAllCoroutines();
+        StartCoroutine(TypeSentence(sentences.Dequeue()));
+    }
 
-        foreach (char letter in sentence.ToCharArray())
-        {
+    IEnumerator TypeSentence(string sentence) {
+        dialogueText.text = "";
+        foreach (char letter in sentence.ToCharArray()) {
             dialogueText.text += letter;
             yield return new WaitForSeconds(typingSpeed);
         }
-
-        isTyping = false;
     }
 
-    // === Setelah Dialog Selesai ===
-    void EndDialogue()
-    {
-        Debug.Log("EndDialogue() terpanggil!");
-
+    void EndDialogue() {
         dialoguePanel.SetActive(false);
-
-        if (preQuizPanel != null)
-        {
-            preQuizPanel.SetActive(true);
-            if (preQuizText != null)
-            {
-                StopAllCoroutines();
-                // Pastikan efek ngetik jalan setelah panel aktif sepenuhnya
-                StartCoroutine(ShowPreQuizWithTyping());
-            }
-        }
+        preQuizPanel.SetActive(true);
+        preQuizText.text = preQuizMessage;
     }
 
-    IEnumerator ShowPreQuizWithTyping()
-    {
-        // Tunggu 1 frame agar panel bener-bener aktif sebelum ngetik
-        yield return null;
-        yield return new WaitForSeconds(0.05f);
-
-        preQuizText.text = "";
-        foreach (char letter in preQuizMessage.ToCharArray())
-        {
-            preQuizText.text += letter;
-            yield return new WaitForSeconds(typingSpeed);
-        }
-    }
-
-
-    // === Tombol Mulai Kuis ===
-    public void StartQuizFromButton()
-    {
-        if (preQuizPanel != null)
-            preQuizPanel.SetActive(false);
-
-        multipleChoicePanel.SetActive(true);
-        quizManager.StartQuiz();
-    }
-
-
-    // === Feedback & Clue ===
-    public void ShowFeedback(string message)
-    {
-        StartCoroutine(ShowFeedbackAndReset(message));
-    }
-
-    IEnumerator ShowFeedbackAndReset(string message)
-    {
-        feedbackText.text = message;
-        feedbackPanel.SetActive(true);
-        yield return new WaitForSeconds(2.5f);
-        feedbackPanel.SetActive(false);
+    public void CancelQuiz() {
+        preQuizPanel.SetActive(false);
         isInteracting = false;
         HideCursor();
+        if (currentNPC != null) {
+            currentNPC.ResetInteraction();
+            currentNPC = null;
+        }
     }
-
-    public void ShowClue()
-    {
-        currentNPC?.SelesaikanPos();
-        cluePanel.SetActive(true);
-        clueText.text = currentNPC != null ? currentNPC.AmbilPetunjuk() : "Petunjuk tidak ditemukan.";
-    }
-
-    public void CloseCluePanel()
-    {
-        cluePanel.SetActive(false);
-        isInteracting = false;
-        HideCursor();
-    }
+    #endregion
 }
