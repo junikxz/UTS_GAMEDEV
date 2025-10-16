@@ -15,3 +15,21 @@ MonoBehaviour:
   questions:
   - songClip: {fileID: 8300000, guid: 2a1fc8f1c5635456b8e9ece9b3c6ef3b, type: 3}
     correctTitle: gemu famire
+  - songClip: {fileID: 8300000, guid: a02c0dce7f4544be8920c4b6c073fb1a, type: 3}
+    correctTitle: bungong jeumpa
+  - songClip: {fileID: 8300000, guid: 39f85b53686314fb9808cf4cc4e77c53, type: 3}
+    correctTitle: butet
+  - songClip: {fileID: 8300000, guid: e5e88d88491c741d38c70ea5bb549069, type: 3}
+    correctTitle: cik cik periuk
+  - songClip: {fileID: 8300000, guid: e16ebceb6a5534335ab519432e05dfbf, type: 3}
+    correctTitle: injit injit
+  - songClip: {fileID: 8300000, guid: e2506421c41694abfb4754e0a344186d, type: 3}
+    correctTitle: kampuang nan jauh dimato
+  - songClip: {fileID: 8300000, guid: 7e67826cb7db64d42ac472ac10b2ca15, type: 3}
+    correctTitle: ayam den lapeh
+  - songClip: {fileID: 8300000, guid: 41bfcc902af80477ca3abc22c8729aa2, type: 3}
+    correctTitle: rek ayo rek
+  - songClip: {fileID: 8300000, guid: 82f7b548a0e5843adbe6034909b82b1d, type: 3}
+    correctTitle: indung indung
+  - songClip: {fileID: 8300000, guid: 68c0f3ac68a75425abf72f4ce3d73397, type: 3}
+    correctTitle: si patokaan

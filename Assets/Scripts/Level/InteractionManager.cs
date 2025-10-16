@@ -51,7 +51,7 @@ public class InteractionManager : MonoBehaviour
         CoinDisplayManager.instance.RefreshCoins();
 
         // Siapkan pesan dan tampilkan panel
-        string successMessage = $"Selamat!\nKamu telah berhasil menyelesaikan Pos 1!\nSilahkan pergi ke pos 2 untuk menyelesaikan tantangan selanjutnya!\n\n+{coinsPerQuiz} Koin ditambahkan.";
+        string successMessage = $"Selamat!\nKamu telah berhasil menyelesaikan Pos ini!\nSilahkan pergi ke pos selanjutnya untuk menyelesaikan tantangan selanjutnya!\n\n+{coinsPerQuiz} Koin ditambahkan.";
         feedbackText.text = successMessage;
         feedbackPanel.SetActive(true);
         ShowCursor(); // Tampilkan cursor agar bisa klik tombol

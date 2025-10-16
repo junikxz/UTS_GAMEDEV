@@ -5,8 +5,8 @@ using UnityEngine;
 public class Sc_Boy1 : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float walkSpeed = 1f;
-    public float runSpeed = 7f;
+    public float walkSpeed = 2f;
+    public float runSpeed = 5f;
     public float rotationSpeed = 10f; // Kecepatan rotasi karakter
     public float gravity = -9.81f;
     public float jumpForce = 3f;
@@ -55,7 +55,7 @@ public class Sc_Boy1 : MonoBehaviour
         Vector3 inputDirection = new Vector3(h, 0f, v).normalized;
 
         bool isMoving = inputDirection.magnitude >= 0.1f;
-        bool isRunning = isMoving && Input.GetKey(KeyCode.LeftShift) ;
+        bool isRunning = isMoving && Input.GetKey(KeyCode.LeftShift);
 
         if (isMoving)
         {

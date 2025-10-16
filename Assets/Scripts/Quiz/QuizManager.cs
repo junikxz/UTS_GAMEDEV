@@ -3,14 +3,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class QuizManager : BaseQuizLogic 
+public class QuizManager : BaseQuizLogic
 {
+    public static QuizManager Instance;
     [Header("UI References (Milik Kuis Ini)")]
     public GameObject quizPanel;
     public TextMeshProUGUI questionText;
     public TextMeshProUGUI timerText; // PASTIKAN INI DIISI DI INSPECTOR
     public Button[] optionButtons;
-
     [System.Serializable]
     public class Question
     {
@@ -47,9 +47,9 @@ public class QuizManager : BaseQuizLogic
         if (isCountingDown)
         {
             currentTime -= Time.deltaTime;
-            
+
             // Pastikan timerText tidak null sebelum digunakan
-            if (timerText != null) 
+            if (timerText != null)
             {
                 timerText.text = Mathf.CeilToInt(currentTime).ToString();
             }
@@ -65,7 +65,7 @@ public class QuizManager : BaseQuizLogic
     public override void StartQuiz()
     {
         Debug.Log("✅ Memulai Kuis Pilihan Ganda!");
-        
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
@@ -102,14 +102,14 @@ public class QuizManager : BaseQuizLogic
     void OnAnswerSelected(int index)
     {
         if (!isCountingDown) return;
-        
+
         // Hentikan timer & nonaktifkan semua tombol agar tidak bisa diklik ganda
-        isCountingDown = false; 
+        isCountingDown = false;
         foreach (var btn in optionButtons)
         {
             btn.interactable = false;
         }
-        
+
         Question q = questions[currentQuestionIndex];
         bool isCorrect = (index == q.correctAnswerIndex);
 
@@ -122,7 +122,7 @@ public class QuizManager : BaseQuizLogic
         else
         {
             optionButtons[index].image.color = wrongColor;
-            Invoke(nameof(FailQuiz), 1.2f); 
+            Invoke(nameof(FailQuiz), 1.2f);
         }
     }
 
