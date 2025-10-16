@@ -60,7 +60,7 @@ public class InteractionManager : MonoBehaviour
     public void HandleQuizFailure(string reason)
     {
         if (currentNPC == null) return;
-        
+
         Debug.Log("Kuis Gagal: " + reason + ". Kembali ke Pre-Quiz Panel.");
 
         // Tampilkan cursor agar bisa klik tombol di preQuizPanel
@@ -68,7 +68,7 @@ public class InteractionManager : MonoBehaviour
 
         // Aktifkan kembali preQuizPanel
         preQuizPanel.SetActive(true);
-        
+
         // Pastikan isInteracting tetap true agar pemain tidak bisa bergerak
         isInteracting = true;
     }
@@ -84,7 +84,8 @@ public class InteractionManager : MonoBehaviour
         if (wasQuizSuccessful)
         {
             // Jika kuis berhasil, selesaikan pos
-            if (currentNPC != null) {
+            if (currentNPC != null)
+            {
                 currentNPC.SelesaikanPos();
                 currentNPC = null;
             }
@@ -92,14 +93,15 @@ public class InteractionManager : MonoBehaviour
         else
         {
             // Jika kuis gagal, reset interaksi
-            if(currentNPC != null) {
+            if (currentNPC != null)
+            {
                 currentNPC.ResetInteraction();
             }
         }
     }
 
     // DIHAPUS: Coroutine ShowFeedbackAndProceed dan ShowFeedbackAndReset yang lama
-    
+
     // ... (Sisa kode untuk dialog, prompt, dll. tidak perlu diubah) ...
     #region Logika Dialog dan Interaksi Lainnya
     public void ShowCursor() { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
@@ -107,20 +109,22 @@ public class InteractionManager : MonoBehaviour
     public void ShowInteractPrompt() { if (interactPromptPanel) interactPromptPanel.SetActive(true); }
     public void HideInteractPrompt() { if (interactPromptPanel) interactPromptPanel.SetActive(false); }
 
-    public void StartInteraction(NPCPosController npc) {
+    public void StartInteraction(NPCPosController npc)
+    {
         isInteracting = true;
         currentNPC = npc;
         ShowCursor();
         StartDialogue(npc.dialogAwal);
     }
 
-    void StartDialogue(DialogueData dialogue) {
+    void StartDialogue(DialogueData dialogue)
+    {
         dialoguePanel.SetActive(true);
         sentences.Clear();
         foreach (string sentence in dialogue.kalimat) sentences.Enqueue(sentence);
         DisplayNextSentence();
     }
-    
+
     public void OnClickStartQuiz()
     {
         preQuizPanel.SetActive(false);
@@ -133,31 +137,37 @@ public class InteractionManager : MonoBehaviour
         }
     }
 
-    public void DisplayNextSentence() {
+    public void DisplayNextSentence()
+    {
         if (sentences.Count == 0) { EndDialogue(); return; }
         StopAllCoroutines();
         StartCoroutine(TypeSentence(sentences.Dequeue()));
     }
 
-    IEnumerator TypeSentence(string sentence) {
+    IEnumerator TypeSentence(string sentence)
+    {
         dialogueText.text = "";
-        foreach (char letter in sentence.ToCharArray()) {
+        foreach (char letter in sentence.ToCharArray())
+        {
             dialogueText.text += letter;
             yield return new WaitForSeconds(typingSpeed);
         }
     }
 
-    void EndDialogue() {
+    void EndDialogue()
+    {
         dialoguePanel.SetActive(false);
         preQuizPanel.SetActive(true);
         preQuizText.text = preQuizMessage;
     }
 
-    public void CancelQuiz() {
+    public void CancelQuiz()
+    {
         preQuizPanel.SetActive(false);
         isInteracting = false;
         HideCursor();
-        if (currentNPC != null) {
+        if (currentNPC != null)
+        {
             currentNPC.ResetInteraction();
             currentNPC = null;
         }
