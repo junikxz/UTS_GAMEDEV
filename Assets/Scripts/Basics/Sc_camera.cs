@@ -7,9 +7,9 @@ public class Sc_Camera : MonoBehaviour
     public Vector3 offset = new Vector3(0, 2f, 0); // Offset dari target (ketinggian shoulder)
 
     [Header("Camera Settings")]
-    public float distance = 2.0f;
+    public float distance = 5.0f;
     public float minDistance = 2.0f;
-    public float maxDistance = 5.0f;
+    public float maxDistance = 10.0f;
     public float mouseSensitivity = 4.0f;
     public float scrollSensitivity = 2.0f;
 
