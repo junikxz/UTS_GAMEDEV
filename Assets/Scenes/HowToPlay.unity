@@ -9238,8 +9238,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8580566caeef0242bd4205002c98fba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sc_Boy1
-  speed: 2
-  turnSmoothTime: 0.1
+  walkSpeed: 1
+  runSpeed: 7
+  rotationSpeed: 10
+  gravity: -9.81
+  jumpForce: 3
+  cameraScript: {fileID: 0}
 --- !u!4 &455129809 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 687049833756617465, guid: 2e1c80361c3a23d4b8c7edc15e837913, type: 3}
@@ -22737,7 +22741,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sc_camera
   target: {fileID: 455129809}
-  smoothSpeed: 10
+  offset: {x: 0, y: 2, z: 2}
+  distance: 2
+  minDistance: 2
+  maxDistance: 2
+  mouseSensitivity: 4
+  scrollSensitivity: 2
+  rotationSmoothTime: 0.1
+  minPitch: -20
+  maxPitch: 60
+  collisionLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  collisionOffset: 0.3
 --- !u!1001 &1148292419
 PrefabInstance:
   m_ObjectHideFlags: 0
