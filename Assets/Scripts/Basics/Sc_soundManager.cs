@@ -21,7 +21,7 @@ public class Sc_soundManager : MonoBehaviour
         }
     }
 
-public void PlaySound(string soundName)
+    public void PlaySound(string soundName)
     {
         sfxSource.PlayOneShot(sfxLibrary.GetClipFromName(soundName));
     }
