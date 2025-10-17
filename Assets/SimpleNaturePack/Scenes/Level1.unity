@@ -50873,8 +50873,8 @@ MonoBehaviour:
     correctAnswer: clorot
   - image: {fileID: 2800000, guid: 23608548efee449cfafacd0e805ec1bd, type: 3}
     correctAnswer: jaipong
-  - image: {fileID: 2800000, guid: d16605454b7ba4bd0a2119e2f11f2392, type: 3}
-    correctAnswer: bandrek
+  - image: {fileID: 2800000, guid: 1908f0bef9add480195dbcbfd3b746fd, type: 3}
+    correctAnswer: joglo
   - image: {fileID: 2800000, guid: d16605454b7ba4bd0a2119e2f11f2392, type: 3}
     correctAnswer: bandrek
   timePerQuestion: 20

@@ -9,7 +9,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: isRun
+    m_ConditionEvent: isJalan
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -1832388901503511333}
@@ -58,22 +58,10 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: boy1
+  m_Name: boy1 1
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: isJalan
-    m_Type: 4
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
-  - m_Name: isRun
-    m_Type: 4
-    m_DefaultFloat: 0
-    m_DefaultInt: 0
-    m_DefaultBool: 0
-    m_Controller: {fileID: 9100000}
-  - m_Name: isTalk
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -210,13 +198,8 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-<<<<<<< HEAD
   - m_ConditionMode: 2
-    m_ConditionEvent: isRun
-=======
-  - m_ConditionMode: 1
     m_ConditionEvent: isJalan
->>>>>>> origin/main
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 5984979081799373259}
