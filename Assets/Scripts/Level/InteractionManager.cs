@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class InteractionManager : MonoBehaviour
 {
@@ -98,6 +99,11 @@ public class InteractionManager : MonoBehaviour
                 currentNPC.ResetInteraction();
             }
         }
+    }
+
+    public void LoadIntroduction()
+    {
+        SceneManager.LoadScene("Introduction");
     }
 
     // DIHAPUS: Coroutine ShowFeedbackAndProceed dan ShowFeedbackAndReset yang lama

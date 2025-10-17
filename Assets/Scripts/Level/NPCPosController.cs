@@ -1,4 +1,4 @@
-using UnityEngine;
+    using UnityEngine;
 
 [RequireComponent(typeof(SphereCollider))]
 [RequireComponent(typeof(BaseQuizLogic))] // Wajibkan setiap NPC punya script kuis
