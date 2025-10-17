@@ -12,6 +12,9 @@ public class NPCPosController : MonoBehaviour
     [Header("Pengaturan Animasi & Rotasi")]
     public float lookSpeed = 5f; // Kecepatan NPC menengok
 
+    [Header("Pengaturan Khusus")] // <-- HEADER BARU
+    public bool skipPreQuizPanel = false; // <-- VARIABEL BARU (SAKLAR)
+
     // Variabel internal
     private bool playerInRange = false;
     private bool hasInteracted = false;
