@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfae933aabb6049109866f2a65f655bc, type: 3}
+  m_Name: MCQ_Pos1
+  m_EditorClassIdentifier: 
+  daftarPertanyaan:
+  - teksPertanyaan: Apa ibukota indonesia
+    jawaban:
+    - Jakarta
+    - Bandung
+    - Surabaya
+    - Semarang
+    indeksJawabanBenar: 0
+  - teksPertanyaan: sksksksks
+    jawaban:
+    - aaa
+    - as
+    - ss
+    - dd
+    indeksJawabanBenar: 0
+  hadiahKoin: 100
+  petunjukBerikutnya: Silahkan ke Pos 2 yang ada di dekat sungai

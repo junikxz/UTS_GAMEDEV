@@ -6,6 +6,7 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
+/Assets/_Recovery/
 
 # Visual Studio / Rider
 .vs/
@@ -14,3 +15,6 @@
 *.user
 *.userprefs
 *.csproj
+.DS_STORE
+/Assets/.DS_STORE
+/Assets/SimpleNaturePack/.DS_STORE
