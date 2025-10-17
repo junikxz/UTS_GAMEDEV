@@ -4,9 +4,16 @@ using UnityEngine.SceneManagement;
 public class TutorialManager : MonoBehaviour
 {
     public static TutorialManager Instance { get; private set; }
+
+    [Header("Dialogue Assets")]
     public Conversation welcomeMessage;
     public Conversation objectiveMessage;
     public Conversation completionMessage;
+
+    [Header("Object References")]
+    public Transform playerTransform;
+    public Transform destinationPoint;
+    public Sc_Camera mainCameraController;
 
     private bool hasMoved = false;
 
@@ -67,16 +74,39 @@ public class TutorialManager : MonoBehaviour
 
     private void StartCompletionDialogue()
     {
-        DialogueManager.OnDialogueEnd += LoadIntroduction; // load leve1 after tutorial finished
+        // DialogueManager.OnDialogueEnd += LoadIntroduction; // load leve1 after tutorial finished
+        // DialogueManager.Instance.StartDialogue(completionMessage);
+
+        DialogueManager.OnDialogueEnd += MovePlayerToDestination; // <-- CHANGE THIS
         DialogueManager.Instance.StartDialogue(completionMessage);
     }
 
-    private void LoadIntroduction()
+    // private void LoadIntroduction()
+    // {
+    //     Debug.Log("Completion dialogue finished. Loading Level 1...");
+
+    //     DialogueManager.OnDialogueEnd -= LoadIntroduction;
+
+    //     SceneManager.LoadScene("Introduction");
+    // }
+
+    private void MovePlayerToDestination()
     {
-        Debug.Log("Completion dialogue finished. Loading Level 1...");
+        Debug.Log("Completion dialogue finished. Moving player to destination.");
 
-        DialogueManager.OnDialogueEnd -= LoadIntroduction;
+        // IMPORTANT: Unsubscribe from the event to prevent this from running again.
+        DialogueManager.OnDialogueEnd -= MovePlayerToDestination;
 
-        SceneManager.LoadScene("Introduction");
+        // Check if the references are set to avoid errors
+        if (playerTransform != null && destinationPoint != null)
+        {
+            // Instantly move the player to the destination's position and rotation
+            playerTransform.position = destinationPoint.position;
+            playerTransform.rotation = destinationPoint.rotation;
+        }
+        else
+        {
+            Debug.LogWarning("Player Transform or Destination Point is not set in the TutorialManager Inspector!");
+        }
     }
 }

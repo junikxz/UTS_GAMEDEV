@@ -15,8 +15,9 @@ MonoBehaviour:
   dialogueLines:
   - speakerName: NusantaraQuest
     sentence: 'Apakah kamu sudah paham? Kerja bagus! Kamu sudah mengetahui cara bermain
-      dan tujuan kamu di sini!
+      dan tujuan kamu di sini! Sekarang coba kamu ke karakter berbaju biru di dekat
+      batu itu!
 
 
-      Selamat bermain!'
+      Selamat mencoba instruksi selanjutnya!'
   freezePlayerMovement: 1
