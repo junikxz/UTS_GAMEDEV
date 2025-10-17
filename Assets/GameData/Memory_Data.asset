@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49d2eb9ed4ec6480ab0f4ad22e8ae6b9, type: 3}
   m_Name: Memory_Data
   m_EditorClassIdentifier: Assembly-CSharp::MemoryCardData
-  sequenceToWin: 10
+  sequenceToWin: 2
   timeBetweenFlashes: 1

@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0a7dd1c1967d43cd94fe4210d8f166d, type: 3}
   m_Name: Dialogue_Last
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
-  kalimat: []
+  kalimat:
+  - Wahhh kamu pintar banget sudah bisa melewati pos - pos yang sulit ini! Silahkan
+    klik lanjut untuk mengambil hadiahmu!
