@@ -15,6 +15,8 @@ public class InteractionManager : MonoBehaviour
     public GameObject interactPromptPanel;
     public GameObject feedbackPanel;
 
+    public GameObject victoryPanel;
+
     [Header("UI Komponen")]
     public TextMeshProUGUI dialogueText;
     public TextMeshProUGUI preQuizText;
@@ -55,6 +57,7 @@ public class InteractionManager : MonoBehaviour
         string successMessage = $"Selamat!\nKamu telah berhasil menyelesaikan Pos ini!\nSilahkan pergi ke pos selanjutnya untuk menyelesaikan tantangan selanjutnya!\n\n+{coinsPerQuiz} Koin ditambahkan.";
         feedbackText.text = successMessage;
         feedbackPanel.SetActive(true);
+        GameManager.instance.TambahKoin(coinsPerQuiz);
         ShowCursor(); // Tampilkan cursor agar bisa klik tombol
     }
 
@@ -160,11 +163,50 @@ public class InteractionManager : MonoBehaviour
         }
     }
 
+    // Ganti fungsi EndDialogue() yang lama dengan yang ini
     void EndDialogue()
     {
+        // Sembunyikan panel dialog
         dialoguePanel.SetActive(false);
-        preQuizPanel.SetActive(true);
-        preQuizText.text = preQuizMessage;
+
+        // --- LOGIKA BARU ---
+        // Cek "saklar" di NPC yang sedang aktif
+        if (currentNPC != null && currentNPC.skipPreQuizPanel)
+        {
+            // Jika saklar aktif, lewati PreQuizPanel dan langsung jalankan "kuis" (pemberian hadiah)
+            currentNPC.JalankanKuis();
+        }
+        else
+        {
+            // Jika saklar tidak aktif (untuk Pos 1-4), tampilkan PreQuizPanel seperti biasa
+            if (preQuizPanel != null)
+            {
+                preQuizPanel.SetActive(true);
+            }
+            else
+            {
+                // Cadangan jika PreQuizPanel lupa dihubungkan
+                currentNPC.JalankanKuis();
+            }
+        }
+    }
+
+    public void CloseVictoryPanel()
+    {
+        // 1. Sembunyikan panel kemenangan
+        if (victoryPanel != null)
+        {
+            victoryPanel.SetActive(false);
+        }
+
+        // 2. Tandai bahwa interaksi sudah selesai
+        isInteracting = false;
+
+        // 3. Sembunyikan cursor dan kembalikan kontrol ke pemain
+        HideCursor();
+
+        // Tidak ada lagi yang perlu dilakukan. 
+        // Kita tidak perlu mereset NPC karena permainan sudah selesai.
     }
 
     public void CancelQuiz()
