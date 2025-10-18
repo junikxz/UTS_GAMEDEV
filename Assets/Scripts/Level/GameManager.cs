@@ -64,13 +64,13 @@ public class GameManager : MonoBehaviour
         }
 
         // 1. Pilih bendera secara acak dari daftar
-        Sprite randomFlag = flagSprites[Random.Range(0, flagSprites.Length)];
+        // Sprite randomFlag = flagSprites[Random.Range(0, flagSprites.Length)];
 
         // 2. Tampilkan di UI
-        if (flagImage != null)
-        {
-            flagImage.sprite = randomFlag;
-        }
+        // if (flagImage != null)
+        // {
+        //     flagImage.sprite = randomFlag;
+        // }
 
         // // 3. Atur pesan kemenangan
         // if (rewardMessageText != null)
