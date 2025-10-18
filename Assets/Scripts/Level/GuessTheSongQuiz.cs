@@ -24,6 +24,23 @@ public class GuessTheSongQuiz : BaseQuizLogic
     private Coroutine quizTimerCoroutine;
     private Coroutine songPlaybackCoroutine;
 
+    void Start()
+    {
+        if (answerInputField != null)
+        {
+            answerInputField.onEndEdit.AddListener(OnInputEndEdit);
+        }
+    }
+
+    void OnInputEndEdit(string text)
+    {
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            CheckAnswer();
+        }
+    }
+
+
     public override void StartQuiz()
     {
         audioSource = FindObjectOfType<AudioSource>();
