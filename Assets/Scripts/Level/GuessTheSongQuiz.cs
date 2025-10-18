@@ -24,6 +24,23 @@ public class GuessTheSongQuiz : BaseQuizLogic
     private Coroutine quizTimerCoroutine;
     private Coroutine songPlaybackCoroutine;
 
+    void Start()
+    {
+        if (answerInputField != null)
+        {
+            answerInputField.onEndEdit.AddListener(OnInputEndEdit);
+        }
+    }
+
+    void OnInputEndEdit(string text)
+    {
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            CheckAnswer();
+        }
+    }
+
+
     public override void StartQuiz()
     {
         audioSource = FindObjectOfType<AudioSource>();
@@ -52,6 +69,7 @@ public class GuessTheSongQuiz : BaseQuizLogic
         answerInputField.text = "";
         playSongButton.onClick.RemoveAllListeners();
         playSongButton.onClick.AddListener(PlayCurrentSong);
+        answerInputField.ActivateInputField();
     }
 
     void PlayCurrentSong()
@@ -119,7 +137,8 @@ public class GuessTheSongQuiz : BaseQuizLogic
     IEnumerator ShowAnswerEffect(bool isCorrect)
     {
         // Simpan warna asli background input
-        Color originalColor = answerInputField.image.color;
+        Color originalInputColor = answerInputField.image.color;
+        Color originalButtonColor = submitButton.image.color;
 
         // Tentukan warna target (hijau atau merah)
         Color targetColor = isCorrect
@@ -132,11 +151,13 @@ public class GuessTheSongQuiz : BaseQuizLogic
         // Fade in ke warna target
         while (elapsed < duration)
         {
-            answerInputField.image.color = Color.Lerp(originalColor, targetColor, elapsed / duration);
+            answerInputField.image.color = Color.Lerp(originalInputColor, targetColor, elapsed / duration);
+            submitButton.image.color = Color.Lerp(originalButtonColor, targetColor, elapsed / duration);
             elapsed += Time.deltaTime;
             yield return null;
         }
         answerInputField.image.color = targetColor;
+        submitButton.image.color = targetColor;
 
         // Tahan warna sebentar
         yield return new WaitForSeconds(0.5f);
@@ -145,11 +166,12 @@ public class GuessTheSongQuiz : BaseQuizLogic
         elapsed = 0f;
         while (elapsed < duration)
         {
-            answerInputField.image.color = Color.Lerp(targetColor, originalColor, elapsed / duration);
+            answerInputField.image.color = Color.Lerp(targetColor, originalInputColor, elapsed / duration);
+            submitButton.image.color = Color.Lerp(targetColor, originalInputColor, elapsed / duration);
             elapsed += Time.deltaTime;
             yield return null;
         }
-        answerInputField.image.color = originalColor;
+        answerInputField.image.color = originalInputColor;
 
         // 🔁 Lanjut logika setelah efek selesai
         if (isCorrect)
