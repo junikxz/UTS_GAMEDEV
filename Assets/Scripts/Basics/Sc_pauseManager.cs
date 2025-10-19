@@ -68,7 +68,7 @@ public class Sc_pauseManager : MonoBehaviour
     void Pause()
     {
         pauseMenuPanel.SetActive(true);
-        Time.timeScale = 0f; // Hentikan waktu game
+        Time.timeScale = 0.0001f;
         isPaused = true;
         // Tampilkan cursor
         Cursor.lockState = CursorLockMode.None;
@@ -85,6 +85,4 @@ public class Sc_pauseManager : MonoBehaviour
         isPaused = false;
         SceneManager.LoadScene(mainMenuSceneName);
     }
-
-
 }
