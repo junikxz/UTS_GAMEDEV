@@ -50,12 +50,12 @@ public class Sc_Camera : MonoBehaviour
         if (target == null) return;
 
         // Toggle cursor lock dengan tombol Escape
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Cursor.lockState = Cursor.lockState == CursorLockMode.Locked ?
-                CursorLockMode.None : CursorLockMode.Locked;
-            Cursor.visible = !Cursor.visible;
-        }
+        // if (Input.GetKeyDown(KeyCode.Escape))
+        // {
+        //     Cursor.lockState = Cursor.lockState == CursorLockMode.Locked ?
+        //         CursorLockMode.None : CursorLockMode.Locked;
+        //     Cursor.visible = !Cursor.visible;
+        // }
 
         if (Sc_pauseManager.Instance.isPaused)
         {
