@@ -1,8 +1,5 @@
-using TMPro;
-using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Sc_options : MonoBehaviour

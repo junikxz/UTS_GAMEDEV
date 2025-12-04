@@ -13,8 +13,6 @@ public class TutorialManager : MonoBehaviour
     [Header("Object References")]
     public Transform playerTransform;
     public Transform destinationPoint;
-    public Sc_Camera mainCameraController;
-
     private bool hasMoved = false;
 
     void Awake()

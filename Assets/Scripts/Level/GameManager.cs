@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public GameObject victoryPanel;            // Panel yang muncul di akhir
     public TextMeshProUGUI rewardMessageText;    // Teks di dalam victoryPanel
     public Image flagImage;                    // Tempat untuk menampilkan gambar bendera
+    public GameObject pauseMenuManager;
 
     [Header("Pengaturan Hadiah")]
     public Sprite[] flagSprites; // Daftar gambar bendera (PNG) yang akan Anda masukkan
@@ -36,6 +37,7 @@ public class GameManager : MonoBehaviour
         // Sembunyikan panel kemenangan di awal
         if (victoryPanel != null) victoryPanel.SetActive(false);
         UpdateCoinDisplay(); // Pastikan tampilan koin 0 di awal
+
     }
 
     // Fungsi ini dipanggil oleh InteractionManager setelah kuis berhasil

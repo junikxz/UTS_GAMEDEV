@@ -33,12 +33,50 @@ public class InteractionManager : MonoBehaviour
     private Queue<string> sentences;
     private bool wasQuizSuccessful; // ✨ VARIABEL BARU untuk mengingat hasil kuis
 
+
     void Awake()
     {
-        if (instance == null) instance = this;
-        else Destroy(gameObject);
+        // Pastikan tidak ada duplikasi instance dalam satu scene
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        // Tidak perlu DontDestroyOnLoad karena tiap scene punya manager sendiri
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
         sentences = new Queue<string>();
     }
+
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Coba cari ulang referensi UI di scene baru
+        if (dialoguePanel == null)
+            dialoguePanel = GameObject.Find("DialoguePanel");
+
+        if (dialogueText == null)
+            dialogueText = GameObject.Find("DialogueText")?.GetComponent<TextMeshProUGUI>();
+
+        if (preQuizPanel == null)
+            preQuizPanel = GameObject.Find("PreQuizPanel");
+
+        if (feedbackPanel == null)
+            feedbackPanel = GameObject.Find("FeedbackPanel");
+
+        if (interactPromptPanel == null)
+            interactPromptPanel = GameObject.Find("InteractPromptPanel");
+
+        if (victoryPanel == null)
+            victoryPanel = GameObject.Find("VictoryPanel");
+    }
+
+
 
     // === Sistem Penanganan Hasil Kuis (Diperbaiki) ===
     public void HandleQuizSuccess()
@@ -104,9 +142,9 @@ public class InteractionManager : MonoBehaviour
         }
     }
 
-    public void LoadIntroduction()
+    public void LoadMainMenu()
     {
-        SceneManager.LoadScene("Introduction");
+        SceneManager.LoadScene("Menu");
     }
 
     // DIHAPUS: Coroutine ShowFeedbackAndProceed dan ShowFeedbackAndReset yang lama

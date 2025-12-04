@@ -57,10 +57,6 @@ public class Sc_Camera : MonoBehaviour
         //     Cursor.visible = !Cursor.visible;
         // }
 
-        if (Sc_pauseManager.Instance.isPaused)
-        {
-            return; // Langsung keluar dari fungsi LateUpdate
-        }
 
         HandleInput();
         UpdateCameraPosition();

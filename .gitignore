@@ -7,6 +7,11 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 /Assets/_Recovery/
+/.vscode/
+/Packages
+/Assets/*
+!/Assets/Scripts/
+!/Assets/Scripts/**
 
 # Visual Studio / Rider
 .vs/

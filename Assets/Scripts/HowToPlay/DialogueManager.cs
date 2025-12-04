@@ -95,6 +95,9 @@ public class DialogueManager : MonoBehaviour
         isDialogueActive = false;
 
         dialogeBoxPanel.SetActive(false);
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         Debug.Log("End of conversation");
     }
 }
